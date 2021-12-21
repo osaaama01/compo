@@ -7,8 +7,8 @@ import {
 import { getActivitiesList, addActivity, removeActivity } from "../../redux/actions";
 import { useSelector, useDispatch } from 'react-redux';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { InputField } from '../../components/InputFieldComponent';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { InputField } from '../../components/InputFieldComponent'
+import auth from '@react-native-firebase/auth';
 
 
 export const HomeScreen = ({ route }) => {
@@ -44,8 +44,7 @@ export const HomeScreen = ({ route }) => {
 
                             <Pressable style={{ flex: 0.1 }} onPress={() => onDelete(item.id)}>
                                 <View style={[styles.card, { backgroundColor: 'red' }]}>
-                                    <Text style={styles.text}>
-                                        <Icon name="delete" size={25} color="black" /></Text>
+                                    <Text style={styles.text}>X</Text>
                                 </View>
                             </Pressable>
                         </View>
@@ -67,6 +66,9 @@ export const Logout = ({ navigation }) => {
             setTimeout(() => {
                 // console.log("Call Back running");
                 setIsLoading(false);
+                auth()
+                    .signOut()
+                    .then(() => console.log('User signed out!'));
             }, 1000);
             // console.log("ComponentDidMount");
             isMountedVal.current = false;
@@ -74,6 +76,7 @@ export const Logout = ({ navigation }) => {
 
         return () => {
             // console.log("Unmounting");
+
             navigation.navigate('Login', { users: [] });
         }
 
@@ -110,49 +113,32 @@ export function Home({ navigation }) {
     }
 
     return (
-        <Drawer.Navigator initialRouteName="HomeScreen" screenOptions={{
-            headerStyle: {
-                backgroundColor: '#fff',
-            },
-        }}>
+        <Drawer.Navigator initialRouteName="HomeScreen" >
             <Drawer.Screen name="HomeScreen" component={HomeScreen} options={
                 {
-                    title: "Home",
-                    drawerIcon: ({ size }) => (
-                        <Icon
-                            name="home"
-                            size={size}
-                        />
-                    ),
                     headerRight: () => (
-                        <View style={{flexDirection:'row-reverse',alignItems:'center'}}>
-                            <Pressable
-                                style={
-                                    {
-                                        backgroundColor: '#009dff',
-                                        borderRadius: 50,
-                                        width: 20,
-                                        height: 40,
-                                        alignitems: 'center',
-                                        justifyContent: 'center',
-                                        marginRight: 4,
-                                        flex:0.2
-                                    }
+                        <Pressable
+                            style={
+                                {
+                                    backgroundColor: '#009dff',
+                                    borderRadius: 50,
+                                    width: 40,
+                                    height: 40,
+                                    alignitems: 'center',
+                                    justifyContent: 'center',
+                                    marginRight: 5
                                 }
-                                onPress={() => {
-                                    setModalVisible(!modalVisible);
-                                }
-                                }
-                            >
-                                <Text style={{
-                                    alignSelf: 'center',
-                                    alignItems: 'center',
-                                }}><Icon
-                                        name="lead-pencil"
-                                        size={30}
-                                        color={'black'}
-                                    /></Text>
-                            </Pressable>
+                            }
+                            onPress={() => {
+                                setModalVisible(!modalVisible);
+                            }
+                            }
+                        >
+                            <Text style={{
+                                fontSize: 30,
+                                alignSelf: 'center',
+                                paddingTop: 9
+                            }}>+</Text>
                             <View style={styles.centeredView}>
                                 <Modal
                                     animationType="slide"
@@ -187,19 +173,10 @@ export function Home({ navigation }) {
                                     </View>
                                 </Modal>
                             </View>
-                        </View>
-
+                        </Pressable>
                     )
                 }} />
-            <Drawer.Screen name="Logout" component={Logout} options={{
-                headerShown: false,
-                drawerIcon: ({ size, color }) => (
-                    <Icon
-                        name="logout"
-                        size={size}
-                    />
-                ),
-            }} />
+            <Drawer.Screen name="Logout" component={Logout} options={{ headerShown: false }} />
         </Drawer.Navigator>
     )
 }
@@ -208,12 +185,12 @@ const styles = StyleSheet.create({
     body:
     {
         flex: 1,
-        backgroundColor: '#303fcf',
+        backgroundColor: '#246EE9',
     },
     card:
     {
         height: 80,
-        backgroundColor: '#18dfe7',
+        backgroundColor: '#3EB489',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 7,
@@ -227,9 +204,10 @@ const styles = StyleSheet.create({
         fontFamily: 'ShadowsIntoLight-Regular'
     },
     centeredView: {
+        flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        flex:1,
+        marginTop: 22,
     },
     modalView: {
         margin: 20,
