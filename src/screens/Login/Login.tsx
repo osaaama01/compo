@@ -15,7 +15,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Home } from '../Home/Home';
 import { Provider } from 'react-redux';
-import { getPeopleList, addActivity } from '../../redux/actions';
 import { useSelector, useDispatch } from 'react-redux';
 import reduxStore, { rootReducer } from '../../redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -24,7 +23,7 @@ import auth from '@react-native-firebase/auth';
 
 type RootStackParamList = {
   Login: undefined, // undefined because you aren't passing any params to the home screen
-  Home: { users: string[] };
+  Home: { user: any };
 };
 
 type ProfileScreenNavigationProp = NativeStackNavigationProp<
@@ -38,16 +37,10 @@ type Props = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-type User = {
-  name: string,
-  password: string,
-};
-
 export type RootState = ReturnType<typeof rootReducer>
 
 const Login = ({ navigation }: Props) => {
 
-  const { users } = useSelector((state: RootState) => state.userReducer);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -55,38 +48,26 @@ const Login = ({ navigation }: Props) => {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
 
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    //dispatch(getPeopleList());
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-  }, []);
-
   // Handle user state changes
   function onAuthStateChanged(user: any) {
     setUser(user);
     if (initializing) setInitializing(false);
   }
 
+  useEffect(() => {
+    if (!user) {
+      const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+      return subscriber;
+    }
+  }, []);
+
   const onLogin = () => {
-    let check = -1;
-    // users.map((user: User, index: number) => {
-    //   if (user.name === username && user.password === password) {
-    //     check = index;
-    //   }
-    // });
-    // if (check != -1)
-    //   navigation.navigate('Home', { users: users[check] });
-    // else
-    //   Alert.alert("Info", 'Invalid username or password', [{ text: 'OK' }]);
-    auth().signInWithEmailAndPassword(username,password).then(()=>
-    {
-      navigation.navigate('Home', { users: users[check] });
+    auth().signInWithEmailAndPassword(username, password).then(() => {
+      navigation.navigate('Home', { user: user });
     }).
-    catch((error)=>
-    {
-      Alert.alert("Info", 'Invalid username or password', [{ text: 'OK' }]);
-    })
+      catch((error) => {
+        Alert.alert("Info", 'Invalid username or password', [{ text: 'OK' }]);
+      })
   }
 
   if (initializing) return null;
@@ -118,7 +99,6 @@ const Login = ({ navigation }: Props) => {
 
     );
   }
-
   return (
     <View>
       <Text>Welcome</Text>
